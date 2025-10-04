@@ -230,7 +230,10 @@ describe("validateOutputPath", () => {
 	test("should move path to temp directory if outside", () => {
 		const outsidePath = "/etc/test.wav";
 		const result = validateOutputPath(outsidePath);
-		expect(result).toMatch(new RegExp(`^${path.resolve(tmpdir())}`));
+		const tempDir = path.resolve(tmpdir());
+		// Escape special regex characters for cross-platform compatibility
+		const escapedTempDir = tempDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		expect(result).toMatch(new RegExp(`^${escapedTempDir}`));
 		expect(result).toContain("test.wav");
 	});
 
