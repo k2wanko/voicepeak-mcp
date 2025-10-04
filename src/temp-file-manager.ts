@@ -24,7 +24,7 @@ export class TempFileManager {
 		);
 	}
 
-	async create(prefix = CONFIG.TEMP_FILE.PREFIX): Promise<string> {
+	async create(prefix: string = CONFIG.TEMP_FILE.PREFIX): Promise<string> {
 		const tempDir = tmpdir();
 		const fileName = `${prefix}-${Date.now()}-${randomUUID()}${CONFIG.TEMP_FILE.EXTENSION}`;
 		const tempPath = path.join(tempDir, fileName);
