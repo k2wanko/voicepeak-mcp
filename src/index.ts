@@ -97,9 +97,6 @@ async function synthesizeSafe(options: SynthesizeOptions): Promise<string> {
 
 		for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
 			try {
-				console.log(
-					`[VoicePeak MCP] Synthesis attempt ${attempt}/${MAX_RETRIES}`,
-				);
 				await runVoicePeak(voicepeakArgs);
 				// Ensure file was created
 				await tempFileManager.ensureExists(outputFile);
