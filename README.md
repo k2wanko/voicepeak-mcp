@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/k2wanko-voicepeak-mcp-badge.png)](https://mseep.ai/app/k2wanko-voicepeak-mcp)
+
 # voicepeak-mcp
 
 [English](./README.en.md)
