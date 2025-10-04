@@ -12,7 +12,13 @@ import {
 } from "./dictionary.js";
 import { ErrorCode, handleToolError, VoicepeakError } from "./errors.js";
 import { narratorCache } from "./narrator-cache.js";
-import { getPlayArgs, getPlayCommand, getVoicepeakPath } from "./os.js";
+import {
+	getPlayArgs,
+	getPlayCommand,
+	getVoicepeakPath,
+	setPlayCommand,
+	setVoicepeakPath,
+} from "./os.js";
 import { processManager } from "./process-manager.js";
 import { synthesisQueue } from "./synthesis-queue.js";
 import { tempFileManager } from "./temp-file-manager.js";
@@ -623,8 +629,51 @@ server.setRequestHandler(
 	},
 );
 
+// Parse command line arguments
+function parseCommandLineArgs() {
+	const args = process.argv.slice(2);
+
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+
+		if (arg === "--voicepeak-path" && i + 1 < args.length) {
+			const path = args[i + 1];
+			if (path) {
+				setVoicepeakPath(path);
+			}
+			i++; // Skip next argument
+		} else if (arg === "--play-command" && i + 1 < args.length) {
+			const command = args[i + 1];
+			if (command) {
+				setPlayCommand(command);
+			}
+			i++; // Skip next argument
+		} else if (arg === "--help" || arg === "-h") {
+			console.error(`
+VOICEPEAK MCP Server
+
+Usage: voicepeak-mcp [options]
+
+Options:
+  --voicepeak-path <path>    Path to VOICEPEAK executable
+  --play-command <command>   Command to play audio files
+  --help, -h                 Show this help message
+
+Environment Variables:
+  VOICEPEAK_PATH             Path to VOICEPEAK executable
+  VOICEPEAK_PLAY_COMMAND     Command to play audio files
+
+Priority: command line arguments > environment variables > platform defaults
+`);
+			process.exit(0);
+		}
+	}
+}
+
 // Main server startup
 async function main() {
+	parseCommandLineArgs();
+
 	const transport = new StdioServerTransport();
 	await server.connect(transport);
 	// No console output in production to avoid stdio interference

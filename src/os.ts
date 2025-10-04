@@ -12,6 +12,10 @@ interface PlatformConfig {
 	dictionaryPath: string;
 }
 
+// Runtime configuration overrides
+let customVoicepeakPath: string | undefined;
+let customPlayCommand: string | undefined;
+
 const PLATFORM_CONFIGS: Record<Platform, PlatformConfig | null> = {
 	darwin: {
 		voicepeakPath: "/Applications/voicepeak.app/Contents/MacOS/voicepeak",
@@ -51,12 +55,30 @@ export function getPlatformConfig(): PlatformConfig {
 	return config;
 }
 
+export function setVoicepeakPath(path: string): void {
+	customVoicepeakPath = path;
+}
+
+export function setPlayCommand(command: string): void {
+	customPlayCommand = command;
+}
+
 export function getVoicepeakPath(): string {
-	return getPlatformConfig().voicepeakPath;
+	// Priority: custom path > environment variable > platform default
+	return (
+		customVoicepeakPath ||
+		process.env.VOICEPEAK_PATH ||
+		getPlatformConfig().voicepeakPath
+	);
 }
 
 export function getPlayCommand(): string {
-	return getPlatformConfig().playCommand;
+	// Priority: custom command > environment variable > platform default
+	return (
+		customPlayCommand ||
+		process.env.VOICEPEAK_PLAY_COMMAND ||
+		getPlatformConfig().playCommand
+	);
 }
 
 export function getPlayArgs(filePath: string): string[] {

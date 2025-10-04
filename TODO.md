@@ -1,0 +1,2 @@
+- GitHub Issue に Linux サポートを追加
+- GitHub Issue に Windows サポートを追加
