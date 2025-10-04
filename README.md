@@ -80,9 +80,6 @@ Claude Desktop の設定に追加：
 ### dictionary_clear
 全ての辞書エントリをクリアします。
 
-### dictionary_add_common
-一般的な技術用語やプログラミング用語を辞書に一括追加します。
-
 ## 対応プラットフォーム
 
 - ✅ macOS

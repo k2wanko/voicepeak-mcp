@@ -78,9 +78,6 @@ Find dictionary entries by text.
 ### dictionary_clear
 Clear all dictionary entries.
 
-### dictionary_add_common
-Add common technical and programming terms to the dictionary in bulk.
-
 ## Supported Platforms
 
 - ✅ macOS
