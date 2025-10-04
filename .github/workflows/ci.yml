@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     concurrency:
-      group: job-test-matrix-${{ github.ref }}
+      group: job-test-matrix-${{ matrix.os }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request'}}
     strategy:
       matrix:
@@ -57,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     concurrency:
-      group: job-build-matrix-${{ github.ref }}
+      group: job-build-matrix-${{ matrix.os }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request'}}
     strategy:
       matrix:
