@@ -5,11 +5,7 @@ import {
 	ListToolsRequestSchema,
 	type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import {
-	COMMON_PROGRAMMING_TERMS,
-	type DictionaryEntry,
-	dictionaryManager,
-} from "./dictionary.js";
+import { type DictionaryEntry, dictionaryManager } from "./dictionary.js";
 import { ErrorCode, handleToolError, VoicepeakError } from "./errors.js";
 import { narratorCache } from "./narrator-cache.js";
 import {
@@ -345,14 +341,6 @@ const tools: Tool[] = [
 			properties: {},
 		},
 	},
-	{
-		name: "dictionary_add_common",
-		description: "Add common programming terms to the dictionary",
-		inputSchema: {
-			type: "object",
-			properties: {},
-		},
-	},
 ];
 
 // Register tools handler
@@ -588,30 +576,6 @@ server.setRequestHandler(
 							{
 								type: "text",
 								text: "Dictionary cleared successfully.",
-							},
-						],
-					};
-				}
-
-				case "dictionary_add_common": {
-					// Get existing entries
-					const existing = await dictionaryManager.readDictionary();
-					const existingTerms = new Set(existing.map((e) => e.sur));
-
-					// Add only new terms
-					let addedCount = 0;
-					for (const term of COMMON_PROGRAMMING_TERMS) {
-						if (!existingTerms.has(term.sur)) {
-							await dictionaryManager.addEntry(term);
-							addedCount++;
-						}
-					}
-
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Added ${addedCount} common programming terms to the dictionary (${COMMON_PROGRAMMING_TERMS.length - addedCount} already existed).`,
 							},
 						],
 					};
