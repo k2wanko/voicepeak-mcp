@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Test
+  test-matrix:
+    name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -32,8 +32,21 @@ jobs:
       - name: Run tests
         run: bun test
 
-  build:
-    name: Build
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: test-matrix
+    if: always()
+    steps:
+      - name: Check test matrix status
+        run: |
+          if [ "${{ needs.test-matrix.result }}" != "success" ]; then
+            echo "Test matrix failed"
+            exit 1
+          fi
+
+  build-matrix:
+    name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -56,3 +69,16 @@ jobs:
 
       - name: Check build artifacts
         run: bun run -e "import { existsSync } from 'fs'; if (!existsSync('dist/index.js')) { console.error('Build artifact not found'); process.exit(1); }"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: build-matrix
+    if: always()
+    steps:
+      - name: Check build matrix status
+        run: |
+          if [ "${{ needs.build-matrix.result }}" != "success" ]; then
+            echo "Build matrix failed"
+            exit 1
+          fi
