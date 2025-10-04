@@ -9,7 +9,10 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, windows-11-arm, macos-latest]
 
     steps:
       - name: Checkout code
@@ -31,7 +34,10 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, windows-11-arm, macos-latest]
 
     steps:
       - name: Checkout code
@@ -49,8 +55,4 @@ jobs:
         run: bun run build
 
       - name: Check build artifacts
-        run: |
-          if [ ! -f dist/index.js ]; then
-            echo "Build artifact not found"
-            exit 1
-          fi
+        run: bun run -e "import { existsSync } from 'fs'; if (!existsSync('dist/index.js')) { console.error('Build artifact not found'); process.exit(1); }"

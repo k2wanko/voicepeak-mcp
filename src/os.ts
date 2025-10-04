@@ -16,7 +16,7 @@ interface PlatformConfig {
 let customVoicepeakPath: string | undefined;
 let customPlayCommand: string | undefined;
 
-const PLATFORM_CONFIGS: Record<Platform, PlatformConfig | null> = {
+const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
 	darwin: {
 		voicepeakPath: "/Applications/voicepeak.app/Contents/MacOS/voicepeak",
 		playCommand: "afplay",
@@ -26,8 +26,27 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig | null> = {
 			"Library/Application Support/Dreamtonics/Voicepeak/settings/dic.json",
 		),
 	},
-	win32: null, // Not yet supported
-	linux: null, // Not yet supported
+	win32: {
+		voicepeakPath: "C:\\Program Files\\VOICEPEAK\\voicepeak.exe",
+		playCommand: "powershell",
+		playArgs: (filePath) => [
+			"-Command",
+			`(New-Object Media.SoundPlayer '${filePath}').PlaySync()`,
+		],
+		dictionaryPath: path.join(
+			os.homedir(),
+			"AppData/Roaming/Dreamtonics/Voicepeak/settings/dic.json",
+		),
+	},
+	linux: {
+		voicepeakPath: "/usr/local/bin/voicepeak",
+		playCommand: "aplay",
+		playArgs: (filePath) => [filePath],
+		dictionaryPath: path.join(
+			os.homedir(),
+			".config/Dreamtonics/Voicepeak/settings/dic.json",
+		),
+	},
 };
 
 function getPlatform(): Platform {
@@ -43,16 +62,7 @@ function getPlatform(): Platform {
 
 export function getPlatformConfig(): PlatformConfig {
 	const platform = getPlatform();
-	const config = PLATFORM_CONFIGS[platform];
-
-	if (!config) {
-		throw new VoicepeakError(
-			`Platform ${platform} is not yet supported. Only macOS is currently supported.`,
-			ErrorCode.UNKNOWN_ERROR,
-		);
-	}
-
-	return config;
+	return PLATFORM_CONFIGS[platform] as PlatformConfig;
 }
 
 export function setVoicepeakPath(path: string): void {
@@ -92,8 +102,8 @@ export function getDictionaryPath(): string {
 // Check if the current platform is supported
 export function isPlatformSupported(): boolean {
 	try {
-		const platform = getPlatform();
-		return PLATFORM_CONFIGS[platform] !== null;
+		getPlatform();
+		return true;
 	} catch {
 		return false;
 	}
