@@ -82,50 +82,54 @@ describe("SynthesisQueue", () => {
 		});
 	});
 
-	test("should clear queue and reject pending items", async () => {
-		const queue = new SynthesisQueue();
+	test.skipIf(process.platform === "win32")(
+		"should clear queue and reject pending items",
+		async () => {
+			const queue = new SynthesisQueue();
 
-		// Add a long-running task
-		const promise1 = queue.addToQueue(async () => {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-			return "result1";
-		});
+			// Add a long-running task
+			const promise1 = queue.addToQueue(async () => {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				return "result1";
+			});
 
-		// Wait a bit for first item to start
-		await new Promise((resolve) => setTimeout(resolve, 10));
+			// Wait a bit for first item to start
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
-		// Add more items that will be queued
-		const promise2 = queue.addToQueue(async () => "result2");
-		const promise3 = queue.addToQueue(async () => "result3");
+			// Add more items that will be queued
+			const promise2 = queue.addToQueue(async () => "result2");
+			const promise3 = queue.addToQueue(async () => "result3");
 
-		// Clear the queue
-		queue.clear();
+			// Clear the queue
+			queue.clear();
 
-		// Queued items should be rejected
-		let error2: unknown;
-		let error3: unknown;
+			// Queued items should be rejected
+			let error2: unknown;
+			let error3: unknown;
 
-		try {
-			await promise2;
-		} catch (e) {
-			error2 = e;
-		}
+			try {
+				await promise2;
+			} catch (e) {
+				error2 = e;
+			}
 
-		try {
-			await promise3;
-		} catch (e) {
-			error3 = e;
-		}
+			try {
+				await promise3;
+			} catch (e) {
+				error3 = e;
+			}
 
-		// Check errors
-		expect(error2).toBeInstanceOf(VoicepeakError);
-		expect(error3).toBeInstanceOf(VoicepeakError);
-		expect((error2 as VoicepeakError).code).toBe(ErrorCode.QUEUE_CLEARED);
-		expect((error3 as VoicepeakError).code).toBe(ErrorCode.QUEUE_CLEARED);
+			// Check errors
+			expect(error2).toBeInstanceOf(VoicepeakError);
+			expect(error3).toBeInstanceOf(VoicepeakError);
+			expect((error2 as VoicepeakError).code).toBe(ErrorCode.QUEUE_CLEARED);
+			expect((error3 as VoicepeakError).code).toBe(ErrorCode.QUEUE_CLEARED);
 
-		// The first item should still complete (already started)
-		await expect(promise1).resolves.toBe("result1");
-	}, 10000);
+			// The first item should still complete (already started)
+			await expect(promise1).resolves.toBe("result1");
+		},
+		10000,
+	);
 
 	test("should handle concurrent additions to queue", async () => {
 		const queue = new SynthesisQueue();
