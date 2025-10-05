@@ -35,7 +35,7 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
 		],
 		dictionaryPath: path.join(
 			os.homedir(),
-			"AppData/Roaming/Dreamtonics/Voicepeak/settings/dic.json",
+			"AppData\\Local\\Dreamtonics\\Voicepeak\\settings\\user.dic",
 		),
 	},
 	linux: {

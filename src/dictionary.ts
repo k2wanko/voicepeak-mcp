@@ -1,6 +1,11 @@
 // Dictionary management for VOICEPEAK pronunciation customization
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import {
+	type BinaryDicEntry,
+	parseBinaryDic,
+	writeBinaryDic,
+} from "./dic-binary.js";
 import { ErrorCode, VoicepeakError } from "./errors.js";
 import { getDictionaryPath } from "./os.js";
 
@@ -23,9 +28,12 @@ const DEFAULT_ENTRY: Partial<DictionaryEntry> = {
 
 export class DictionaryManager {
 	private dictionaryPath: string;
+	private isBinaryFormat: boolean;
 
 	constructor() {
 		this.dictionaryPath = getDictionaryPath();
+		// Windows uses binary .dic format, macOS/Linux use JSON format
+		this.isBinaryFormat = this.dictionaryPath.endsWith(".dic");
 	}
 
 	/**
@@ -39,6 +47,11 @@ export class DictionaryManager {
 
 			// Check if dictionary file exists
 			try {
+				if (this.isBinaryFormat) {
+					// Windows: Read binary .dic format
+					return this.readBinaryDictionary();
+				}
+				// macOS/Linux: Read JSON format
 				const content = await fs.readFile(this.dictionaryPath, "utf-8");
 				return JSON.parse(content) as DictionaryEntry[];
 			} catch (error) {
@@ -57,6 +70,24 @@ export class DictionaryManager {
 	}
 
 	/**
+	 * Read binary dictionary (Windows)
+	 */
+	private readBinaryDictionary(): DictionaryEntry[] {
+		const binaryEntries = parseBinaryDic(this.dictionaryPath);
+
+		// Convert BinaryDicEntry to DictionaryEntry
+		// Note: Binary format doesn't store surface form, only reading
+		return binaryEntries.map((entry) => ({
+			sur: entry.reading, // Use reading as surface form (limitation)
+			pron: entry.reading,
+			pos: "Japanese_Futsuu_meishi",
+			priority: entry.priority,
+			accentType: 0,
+			lang: "ja",
+		}));
+	}
+
+	/**
 	 * Write dictionary entries
 	 */
 	async writeDictionary(entries: DictionaryEntry[]): Promise<void> {
@@ -65,6 +96,13 @@ export class DictionaryManager {
 			const dir = path.dirname(this.dictionaryPath);
 			await fs.mkdir(dir, { recursive: true });
 
+			if (this.isBinaryFormat) {
+				// Windows: Write binary .dic format
+				this.writeBinaryDictionary(entries);
+				return;
+			}
+
+			// macOS/Linux: Write JSON format
 			// Validate and normalize entries
 			const normalizedEntries = entries.map((entry) => ({
 				...DEFAULT_ENTRY,
@@ -80,6 +118,36 @@ export class DictionaryManager {
 				ErrorCode.FILE_WRITE_ERROR,
 			);
 		}
+	}
+
+	/**
+	 * Write binary dictionary (Windows)
+	 */
+	private writeBinaryDictionary(entries: DictionaryEntry[]): void {
+		// Convert DictionaryEntry to BinaryDicEntry
+		const binaryEntries: BinaryDicEntry[] = entries.map((entry) => ({
+			leftId: 9683, // Default values from CSV analysis
+			rightId: 13557,
+			cost: -5000,
+			pos: "名詞",
+			posDetail: "普通名詞",
+			reading: entry.pron,
+			accent: this.generateAccent(entry.pron),
+			priority: entry.priority ?? 5,
+		}));
+
+		writeBinaryDic(this.dictionaryPath, binaryEntries);
+	}
+
+	/**
+	 * Generate accent pattern from reading
+	 * Simplified version - returns flat accent pattern
+	 */
+	private generateAccent(reading: string): string {
+		// Count mora (approximate by counting characters)
+		const moraCount = reading.length;
+		// Generate simple LH pattern (Low-High at position 0)
+		return `${"H".repeat(moraCount)}@0`;
 	}
 
 	/**
