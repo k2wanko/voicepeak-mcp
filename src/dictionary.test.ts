@@ -43,7 +43,13 @@ describe("DictionaryManager", () => {
 
 		const entries = await manager.readDictionary();
 		expect(entries).toHaveLength(1);
-		expect(entries[0]?.sur).toBe("TypeScript");
+		// On Windows (binary format), sur = pron
+		// On macOS/Linux (JSON format), sur is preserved
+		if (process.platform === "win32") {
+			expect(entries[0]?.sur).toBe("タイプスクリプト");
+		} else {
+			expect(entries[0]?.sur).toBe("TypeScript");
+		}
 		expect(entries[0]?.pron).toBe("タイプスクリプト");
 		expect(entries[0]?.lang).toBe("ja"); // Default value
 		expect(entries[0]?.priority).toBe(5); // Default value
@@ -79,7 +85,11 @@ describe("DictionaryManager", () => {
 
 		await manager.addEntry(entry);
 
-		const removed = await manager.removeEntry("VOICEPEAK");
+		// On Windows (binary format), remove by pronunciation
+		// On macOS/Linux (JSON format), remove by surface form
+		const removeKey =
+			process.platform === "win32" ? "ボイスピーク" : "VOICEPEAK";
+		const removed = await manager.removeEntry(removeKey);
 		expect(removed).toBe(true);
 
 		const entries = await manager.readDictionary();
@@ -105,7 +115,10 @@ describe("DictionaryManager", () => {
 		await manager.addEntry(entry1);
 		await manager.addEntry(entry2);
 
-		const found = await manager.findEntry("Claude");
+		// On Windows (binary format), find by pronunciation
+		// On macOS/Linux (JSON format), find by surface form
+		const searchKey = process.platform === "win32" ? "クロード" : "Claude";
+		const found = await manager.findEntry(searchKey);
 		expect(found).toHaveLength(1);
 		expect(found[0]?.pron).toBe("クロード");
 	});
@@ -167,14 +180,26 @@ describe("DictionaryManager", () => {
 		expect(entries[0]).toBeDefined();
 		const firstEntry = entries[0];
 		if (firstEntry) {
-			expect(firstEntry).toMatchObject({
-				sur: "MinimalEntry",
-				pron: "ミニマル",
-				pos: "Japanese_Futsuu_meishi",
-				priority: 5,
-				accentType: 0,
-				lang: "ja",
-			});
+			// On Windows (binary format), sur = pron and some values are lost
+			if (process.platform === "win32") {
+				expect(firstEntry).toMatchObject({
+					sur: "ミニマル",
+					pron: "ミニマル",
+					pos: "Japanese_Futsuu_meishi",
+					priority: 5,
+					accentType: 0,
+					lang: "ja",
+				});
+			} else {
+				expect(firstEntry).toMatchObject({
+					sur: "MinimalEntry",
+					pron: "ミニマル",
+					pos: "Japanese_Futsuu_meishi",
+					priority: 5,
+					accentType: 0,
+					lang: "ja",
+				});
+			}
 		}
 	});
 
@@ -194,12 +219,29 @@ describe("DictionaryManager", () => {
 		expect(entries[0]).toBeDefined();
 		const firstEntry = entries[0];
 		if (firstEntry) {
-			expect(firstEntry).toMatchObject(entry);
+			// On Windows (binary format), some custom values are lost
+			if (process.platform === "win32") {
+				expect(firstEntry).toMatchObject({
+					sur: "カスタム",
+					pron: "カスタム",
+					pos: "Japanese_Futsuu_meishi", // Lost in binary format
+					priority: 8,
+					accentType: 0, // Lost in binary format
+					lang: "ja",
+				});
+			} else {
+				expect(firstEntry).toMatchObject(entry);
+			}
 		}
 	});
 
 	test("should get dictionary path", () => {
 		const path = manager.getPath();
-		expect(path).toMatch(/dic\.json$/);
+		// On Windows: user.dic, on macOS/Linux: dic.json
+		if (process.platform === "win32") {
+			expect(path).toMatch(/user\.dic$/);
+		} else {
+			expect(path).toMatch(/dic\.json$/);
+		}
 	});
 });

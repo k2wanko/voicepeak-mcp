@@ -156,10 +156,16 @@ export class DictionaryManager {
 	async addEntry(entry: DictionaryEntry): Promise<void> {
 		const entries = await this.readDictionary();
 
+		// For binary format, compare by pronunciation (since surface form = pronunciation)
+		// For JSON format, compare by surface form
+		const compareKey = this.isBinaryFormat ? "pron" : "sur";
+		const searchValue = this.isBinaryFormat ? entry.pron : entry.sur;
+
 		// Check if entry already exists
 		const existingIndex = entries.findIndex(
 			(e) =>
-				e.sur === entry.sur && e.lang === (entry.lang || DEFAULT_ENTRY.lang),
+				e[compareKey] === searchValue &&
+				e.lang === (entry.lang || DEFAULT_ENTRY.lang),
 		);
 
 		if (existingIndex >= 0) {
@@ -181,11 +187,18 @@ export class DictionaryManager {
 
 	/**
 	 * Remove an entry from the dictionary
+	 * @param surface - Surface form (or pronunciation for binary format)
+	 * @param lang - Language code
 	 */
 	async removeEntry(surface: string, lang = "ja"): Promise<boolean> {
 		const entries = await this.readDictionary();
+
+		// For binary format, match by pronunciation
+		// For JSON format, match by surface form
+		const compareKey = this.isBinaryFormat ? "pron" : "sur";
+
 		const filteredEntries = entries.filter(
-			(e) => !(e.sur === surface && e.lang === lang),
+			(e) => !(e[compareKey] === surface && e.lang === lang),
 		);
 
 		if (filteredEntries.length === entries.length) {
@@ -197,11 +210,16 @@ export class DictionaryManager {
 	}
 
 	/**
-	 * Find entries by surface form
+	 * Find entries by surface form (or pronunciation for binary format)
 	 */
 	async findEntry(surface: string): Promise<DictionaryEntry[]> {
 		const entries = await this.readDictionary();
-		return entries.filter((e) => e.sur === surface);
+
+		// For binary format, search by pronunciation
+		// For JSON format, search by surface form
+		const compareKey = this.isBinaryFormat ? "pron" : "sur";
+
+		return entries.filter((e) => e[compareKey] === surface);
 	}
 
 	/**
