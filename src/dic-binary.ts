@@ -93,8 +93,11 @@ export function writeBinaryDic(
 	const stringBuffers: Buffer[] = [];
 	let totalStringSize = 0;
 
-	for (const entry of entries) {
-		const entryStr = formatEntryString(entry);
+	for (let i = 0; i < entries.length; i++) {
+		const entry = entries[i];
+		if (!entry) continue;
+		// The last field is an index (1-based), not priority
+		const entryStr = formatEntryString(entry, i + 1);
 		const entryBuf = Buffer.from(`${entryStr}\0`, "utf-8");
 		stringBuffers.push(entryBuf);
 		totalStringSize += entryBuf.length;
@@ -216,9 +219,11 @@ function writeHeader(buffer: Buffer, entryCount: number): void {
 
 /**
  * Format entry as string for binary storage
+ * @param entry - The dictionary entry
+ * @param index - 1-based index (not priority)
  */
-function formatEntryString(entry: BinaryDicEntry): string {
-	return `${entry.pos},${entry.posDetail},${entry.reading},${entry.accent},*,*,${entry.priority}`;
+function formatEntryString(entry: BinaryDicEntry, index: number): string {
+	return `${entry.pos},${entry.posDetail},${entry.reading},${entry.accent},*,*,${index}`;
 }
 
 /**
