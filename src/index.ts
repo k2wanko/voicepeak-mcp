@@ -455,6 +455,13 @@ server.setRequestHandler(
 				}
 
 				case "dictionary_list": {
+					if (process.platform === "win32") {
+						throw new VoicepeakError(
+							"Windows does not support dictionary management via MCP. Please use the VOICEPEAK application to manage pronunciation dictionary.",
+							ErrorCode.UNSUPPORTED_PLATFORM,
+						);
+					}
+
 					const entries = await dictionaryManager.readDictionary();
 					if (entries.length === 0) {
 						return {
@@ -485,6 +492,13 @@ server.setRequestHandler(
 				}
 
 				case "dictionary_add": {
+					if (process.platform === "win32") {
+						throw new VoicepeakError(
+							"Windows does not support dictionary management via MCP. Please use the VOICEPEAK application to manage pronunciation dictionary.",
+							ErrorCode.UNSUPPORTED_PLATFORM,
+						);
+					}
+
 					const { surface, pronunciation, priority } = args as {
 						surface: string;
 						pronunciation: string;
@@ -510,6 +524,13 @@ server.setRequestHandler(
 				}
 
 				case "dictionary_remove": {
+					if (process.platform === "win32") {
+						throw new VoicepeakError(
+							"Windows does not support dictionary management via MCP. Please use the VOICEPEAK application to manage pronunciation dictionary.",
+							ErrorCode.UNSUPPORTED_PLATFORM,
+						);
+					}
+
 					const { surface } = args as { surface: string };
 					const removed = await dictionaryManager.removeEntry(surface);
 
@@ -535,6 +556,13 @@ server.setRequestHandler(
 				}
 
 				case "dictionary_find": {
+					if (process.platform === "win32") {
+						throw new VoicepeakError(
+							"Windows does not support dictionary management via MCP. Please use the VOICEPEAK application to manage pronunciation dictionary.",
+							ErrorCode.UNSUPPORTED_PLATFORM,
+						);
+					}
+
 					const { surface } = args as { surface: string };
 					const entries = await dictionaryManager.findEntry(surface);
 
@@ -567,6 +595,13 @@ server.setRequestHandler(
 				}
 
 				case "dictionary_clear": {
+					if (process.platform === "win32") {
+						throw new VoicepeakError(
+							"Windows does not support dictionary management via MCP. Please use the VOICEPEAK application to manage pronunciation dictionary.",
+							ErrorCode.UNSUPPORTED_PLATFORM,
+						);
+					}
+
 					await dictionaryManager.clearDictionary();
 					return {
 						content: [

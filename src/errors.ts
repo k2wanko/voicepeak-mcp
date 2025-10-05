@@ -17,6 +17,8 @@ export type ErrorCode =
 	| "TEMP_FILE_ERROR"
 	// Queue errors
 	| "QUEUE_CLEARED"
+	// Platform errors
+	| "UNSUPPORTED_PLATFORM"
 	// Unknown errors
 	| "UNKNOWN_ERROR";
 
@@ -37,6 +39,8 @@ export const ErrorCode = {
 	TEMP_FILE_ERROR: "TEMP_FILE_ERROR" as const,
 	// Queue errors
 	QUEUE_CLEARED: "QUEUE_CLEARED" as const,
+	// Platform errors
+	UNSUPPORTED_PLATFORM: "UNSUPPORTED_PLATFORM" as const,
 	// Unknown errors
 	UNKNOWN_ERROR: "UNKNOWN_ERROR" as const,
 } as const;

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { type DictionaryEntry, DictionaryManager } from "./dictionary.js";
 
-describe("DictionaryManager", () => {
+describe.skipIf(process.platform === "win32")("DictionaryManager", () => {
 	let manager: DictionaryManager;
 
 	beforeEach(async () => {
