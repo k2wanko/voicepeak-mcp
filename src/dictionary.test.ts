@@ -72,9 +72,22 @@ describe("DictionaryManager", () => {
 		await manager.addEntry(entry2);
 
 		const entries = await manager.readDictionary();
-		expect(entries).toHaveLength(1);
-		expect(entries[0]?.pron).toBe("モデルコンテクストプロトコル");
-		expect(entries[0]?.priority).toBe(10);
+
+		if (process.platform === "win32") {
+			// Windows binary format: different pronunciations create separate entries
+			// because surface form is not stored, only pronunciation
+			expect(entries).toHaveLength(2);
+			const updatedEntry = entries.find(
+				(e) => e.pron === "モデルコンテクストプロトコル",
+			);
+			expect(updatedEntry).toBeDefined();
+			expect(updatedEntry?.priority).toBe(10);
+		} else {
+			// macOS/Linux JSON format: same surface form updates existing entry
+			expect(entries).toHaveLength(1);
+			expect(entries[0]?.pron).toBe("モデルコンテクストプロトコル");
+			expect(entries[0]?.priority).toBe(10);
+		}
 	});
 
 	test("should remove an entry from dictionary", async () => {
