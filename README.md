@@ -63,6 +63,8 @@ Claude Desktop の設定に追加：
 ### dictionary_list
 全ての発音辞書エントリをリストします。
 
+**注意**: 辞書機能は Windows では利用できません。Windows ユーザーは VOICEPEAK アプリケーションで発音辞書を管理してください。
+
 ### dictionary_add
 カスタム発音のための辞書エントリを追加または更新します。
 
@@ -71,20 +73,31 @@ Claude Desktop の設定に追加：
 - `pronunciation`（必須）: 日本語かなでの発音
 - `priority`: 優先度（0-10、デフォルト: 5）
 
+**注意**: Windows では利用できません。
+
 ### dictionary_remove
 辞書エントリを削除します。
+
+**注意**: Windows では利用できません。
 
 ### dictionary_find
 テキストで辞書エントリを検索します。
 
+**注意**: Windows では利用できません。
+
 ### dictionary_clear
 全ての辞書エントリをクリアします。
 
+**注意**: Windows では利用できません。
+
 ## 対応プラットフォーム
 
-- ✅ macOS
-- 🚧 Windows（予定）
+- ✅ macOS（全機能対応）
+- ⚠️ Windows（部分対応：音声合成・再生のみ、辞書機能は非対応）
 - 🚧 Linux（予定）
+
+### Windows での制限事項
+Windows 版では、発音辞書の管理機能（dictionary_*）が利用できません。発音のカスタマイズが必要な場合は、VOICEPEAK アプリケーションから辞書を管理してください。
 
 ## 貢献
 

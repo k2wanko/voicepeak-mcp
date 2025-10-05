@@ -1,6 +1,6 @@
 {
 	"name": "voicepeak-mcp",
-	"version": "0.4.2",
+	"version": "0.5.0",
 	"description": "MCP server for VOICEPEAK text-to-speech synthesis",
 	"main": "dist/index.js",
 	"module": "src/index.ts",
