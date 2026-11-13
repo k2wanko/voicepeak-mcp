@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
@@ -143,5 +144,19 @@ describe("TempFileManager", () => {
 		expect(file1).not.toBe(file2);
 		expect(file2).not.toBe(file3);
 		expect(file1).not.toBe(file3);
+	});
+
+	test("should not keep the process alive on its own", () => {
+		// An MCP stdio server must exit once stdin closes. The periodic cleanup
+		// timer must not hold the event loop open by itself.
+		const script = `
+			import { TempFileManager } from ${JSON.stringify(path.resolve(import.meta.dir, "temp-file-manager.ts"))};
+			new TempFileManager();
+		`;
+		const result = spawnSync(process.execPath, ["-e", script], {
+			timeout: 5000,
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.status).toBe(0);
 	});
 });
