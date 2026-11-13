@@ -22,6 +22,9 @@ export class TempFileManager {
 			},
 			5 * 60 * 1000,
 		);
+		// Don't let this timer alone keep the process alive. Otherwise the
+		// server never exits after stdin closes.
+		this.cleanupTimer.unref();
 	}
 
 	async create(prefix: string = CONFIG.TEMP_FILE.PREFIX): Promise<string> {
